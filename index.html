@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>パスワードで動画表示</title>
+  <script>
+    function checkPassword() {
+      const correctPassword = "1234"; // 正しいパスワード
+      const userInput = document.getElementById("password").value;
+
+      if (userInput === correctPassword) {
+        document.getElementById("passwordSection").style.display = "none"; // パスワード入力を非表示
+        document.getElementById("videoSection").style.display = "block"; // 動画を表示
+      } else {
+        alert("パスワードが違います。");
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="passwordSection">
+    <h1>パスワードを入力してください</h1>
+    <input type="password" id="password" placeholder="パスワード">
+    <button onclick="checkPassword()">送信</button>
+  </div>
+
+  <!-- 最初は非表示 -->
+  <div id="videoSection" style="display:none; margin-top:20px;">
+    <h2>テキスト</h2>
