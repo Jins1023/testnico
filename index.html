@@ -1,31 +1,325 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>パスワードで動画表示</title>
-  <script>
-    function checkPassword() {
-      const correctPassword = "1234"; // 正しいパスワード
-      const userInput = document.getElementById("password").value;
-
-      if (userInput === correctPassword) {
-        document.getElementById("passwordSection").style.display = "none"; // パスワード入力を非表示
-        document.getElementById("videoSection").style.display = "block"; // 動画を表示
-      } else {
-        alert("パスワードが違います。");
-      }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ピースマネージャー</title>
+  <style>
+    @font-face {
+      font-family: 'FOT-NewRodin Pro B';
+      src: url('FOT-NewRodin Pro B.otf') format('opentype');
     }
-  </script>
+    * { font-family: 'FOT-NewRodin Pro B', sans-serif; }
+    body {
+      background: #f0f4f8;
+      margin: 0; padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin-top: 40px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 90%; max-width: 520px;
+      border: 3px solid #666;
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+    .stats div {
+      background: #888;
+      padding: 10px 15px;
+      border-radius: 8px;
+      flex: 1;
+      margin: 0 5px;
+      text-align: center;
+      font-weight: bold;
+      color: #fff;
+      border: 2px solid #444;
+    }
+    .animate {
+      animation: scaleUp 0.2s ease;
+    }
+    @keyframes scaleUp {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .total {
+      text-align: right;
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #555;
+      font-weight: bold;
+      border: 2px solid #666;
+      border-radius: 8px;
+      padding: 10px 15px;
+      background: #fff;
+    }
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      user-select: none;
+      color: #fff;
+      font-weight: bold;
+      white-space: nowrap;
+      flex: 1 1 45%;
+      min-width: 120px;
+    }
+    #btn-blackboard, #btn-callout, #btn-clean, #btn-other,
+    #btn-docsort, #btn-prepmaterials {
+      background: #4caf50;
+    }
+    #btn-blackboard:hover, #btn-callout:hover, #btn-clean:hover, #btn-other:hover,
+    #btn-docsort:hover, #btn-prepmaterials:hover {
+      background: #45a045;
+    }
+    #btn-subtract, #reset-btn {
+      background: #f44336;
+    }
+    #btn-subtract:hover, #reset-btn:hover {
+      background: #d32f2f;
+    }
+    .report-btn {
+      background: #2196f3;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .report-btn:hover {
+      background: #1976d2;
+    }
+    #reset-btn {
+      width: 100%;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    @keyframes fadeInOverlay {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+    .overlay.show {
+      display: flex;
+      animation-name: fadeInOverlay;
+      animation-duration: 0.5s;
+      opacity: 1;
+    }
+    .overlay-content {
+      background: #fff;
+      border-radius: 15px;
+      padding: 30px 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 320px;
+      width: 100%;
+    }
+    .overlay-content p.message {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+      font-weight: 600;
+    }
+    .overlay-content p.today-count {
+      font-size: 48px;
+      font-weight: bold;
+      color: #4caf50;
+      margin-bottom: 30px;
+    }
+    .overlay-content button {
+      background: #2196f3;
+      color: #fff;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .overlay-content button:hover {
+      background: #1976d2;
+    }
+    .settings input {
+      margin: 5px 0;
+      padding: 5px;
+      width: 100%;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <div id="passwordSection">
-    <h1>パスワードを入力してください</h1>
-    <input type="password" id="password" placeholder="パスワード">
-    <button onclick="checkPassword()">送信</button>
+  <div class="container" id="main-container">
+    <h1>ピースマネージャー</h1>
+    <div class="stats">
+      <div>今日: <span id="today">0</span></div>
+      <div>昨日: <span id="yesterday">0</span></div>
+    </div>
+    <div class="total">合計ピース: <span id="total">0</span></div>
+
+    <div class="section-title">仕事をしたらボタンを押そう</div>
+    <div class="buttons">
+      <button id="btn-blackboard">黒板消し</button>
+      <button id="btn-callout">名札 呼びかけ</button>
+      <button id="btn-clean">スぺプリ配り</button>
+      <button id="btn-docsort">扇風機消し</button>
+      <button id="btn-prepmaterials">おかわり</button>
+      <button id="btn-other">その他</button>
+      <button id="btn-subtract">減らす</button>
+    </div>
+
+    <button class="report-btn" id="report-btn">ピースを報告する</button>
+
+    <div class="section-title">設定</div>
+    <div class="settings">
+      <label>増加量 <input type="number" id="add-amount" value="1" /></label><br />
+      <label>減少量 <input type="number" id="subtract-amount" value="1" /></label><br />
+      <label>その他の名前 <input type="text" id="other-label" value="その他" /></label><br />
+      <label>その他の増加量 <input type="number" id="other-amount" value="1" /></label>
+    </div>
+
+    <button id="reset-btn">リセット</button>
   </div>
 
-  <!-- 最初は非表示 -->
-  <div id="videoSection" style="display:none; margin-top:20px;">
-    <h2>テキスト</h2>
+  <div id="report-overlay" class="overlay">
+    <div class="overlay-content">
+      <p class="message">一日お疲れさまでした！チームズにこの写真を送ってね！</p>
+      <p class="today-count">0</p>
+      <button class="close-btn" id="close-report-btn">閉じる</button>
+    </div>
+  </div>
 
-    private_data.json
+  <script>
+    let todayPeace = parseInt(localStorage.getItem('todayPeace')) || 0;
+    let yesterdayPeace = parseInt(localStorage.getItem('yesterdayPeace')) || 0;
+    let totalPeace = parseInt(localStorage.getItem('totalPeace')) || 0;
+
+    const todayElem = document.getElementById('today');
+    const yesterdayElem = document.getElementById('yesterday');
+    const totalElem = document.getElementById('total');
+    const reportOverlay = document.getElementById('report-overlay');
+    const todayCountElem = reportOverlay.querySelector('.today-count');
+
+    const otherLabelInput = document.getElementById('other-label');
+    const otherBtn = document.getElementById('btn-other');
+
+    const getVal = id => parseInt(document.getElementById(id).value || 1, 10);
+
+    function animateElement(el) {
+      el.classList.remove('animate');
+      void el.offsetWidth;
+      el.classList.add('animate');
+    }
+
+    function saveData() {
+      localStorage.setItem('todayPeace', todayPeace);
+      localStorage.setItem('yesterdayPeace', yesterdayPeace);
+      localStorage.setItem('totalPeace', totalPeace);
+    }
+
+    function updateDisplay() {
+      todayElem.textContent = todayPeace;
+      yesterdayElem.textContent = yesterdayPeace;
+      totalElem.textContent = totalPeace;
+      animateElement(todayElem);
+      animateElement(totalElem);
+      saveData();
+    }
+
+    function addPeace(amount) {
+      todayPeace += amount;
+      updateDisplay();
+    }
+
+    function subtractPeace() {
+      const sub = getVal('subtract-amount');
+      if (todayPeace >= sub) {
+        todayPeace -= sub;
+        updateDisplay();
+      }
+    }
+
+    function showOverlay() {
+      todayCountElem.textContent = todayPeace;
+      reportOverlay.style.display = 'flex';
+      setTimeout(() => reportOverlay.classList.add('show'), 10);
+    }
+
+    function hideOverlay() {
+      yesterdayPeace = todayPeace;
+      totalPeace += todayPeace;
+      todayPeace = 0;
+      updateDisplay();
+      reportOverlay.classList.remove('show');
+      setTimeout(() => reportOverlay.style.display = 'none', 500);
+    }
+
+    document.getElementById('btn-blackboard').addEventListener('click', () => addPeace(getVal('add-amount')));
+    document.getElementById('btn-callout').addEventListener('click', () => addPeace(getVal('add-amount')));
+    document.getElementById('btn-clean').addEventListener('click', () => addPeace(getVal('add-amount')));
+    document.getElementById('btn-docsort').addEventListener('click', () => addPeace(getVal('add-amount')));
+    document.getElementById('btn-prepmaterials').addEventListener('click', () => addPeace(getVal('add-amount')));
+    document.getElementById('btn-other').addEventListener('click', () => addPeace(getVal('other-amount')));
+    document.getElementById('btn-subtract').addEventListener('click', subtractPeace);
+    document.getElementById('report-btn').addEventListener('click', showOverlay);
+    document.getElementById('close-report-btn').addEventListener('click', hideOverlay);
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      if (confirm('本当にリセットしますか？')) {
+        todayPeace = 0;
+        yesterdayPeace = 0;
+        totalPeace = 0;
+        updateDisplay();
+      }
+    });
+
+    otherLabelInput.addEventListener('input', () => {
+      otherBtn.textContent = otherLabelInput.value || 'その他';
+    });
+
+    updateDisplay();
+  </script>
+</body>
+</html>
